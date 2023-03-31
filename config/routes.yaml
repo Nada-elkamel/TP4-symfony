@@ -6,7 +6,7 @@ save_product:
  path: /article/save
  controller: App\Controller\IndexController::save
  
-article_new:
+new_article:
  path: /article/new
  controller: App\Controller\IndexController::new
  

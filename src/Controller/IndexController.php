@@ -1,6 +1,7 @@
 <?php
 namespace App\Controller;
 
+use App\Form\ArticleType;
 use App\Entity\Article;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
@@ -38,25 +39,16 @@ return $this->render('articles/index.html.twig',['articles'=> $articles]);
   }
 
   public function new(Request $request) {
-    $article = new Article();
-    $form = $this->createFormBuilder($article)
-    ->add('nom', TextType::class)
-    ->add('prix', TextType::class)
-    ->add('save', SubmitType::class, array(
-       'label' => 'Créer'))->getForm();
-  $form->handleRequest($request);
+    $article = new Article(); 
+    $form = $this->createForm(ArticleType::class,$article); 
+    $form->handleRequest($request); if($form->isSubmitted() && $form->isValid()) {
+        $article = $form->getData();
+        $this->entityManager->persist($article);
+        $this->entityManager->flush();
+          return $this->redirectToRoute('article_list'); } 
+   return $this->render('articles/new.html.twig',['form' => $form->createView()]); }
  
-  if($form->isSubmitted() && $form->isValid()) {
-  $article = $form->getData();
- 
-  $entityManager = $this->entityManager;
-  $entityManager->persist($article);
-  $entityManager->flush();
- 
-  return $this->redirectToRoute('article_list');
-  }
-  return $this->render('articles/new.html.twig',['form' => $form->createView()]);
-  }
+   
    
   public function show($id) {
     $article = $this->entityManager->getRepository(Article::class)
@@ -67,25 +59,23 @@ return $this->render('articles/index.html.twig',['articles'=> $articles]);
 
    public function edit(Request $request, $id) {
     $article = new Article();
-    $article = $this->entityManager->getRepository(Article::class)->find($id);
+   $article = $this->entityManaager->getRepository(Article::class)->find($id);
    
-    $form = $this->createFormBuilder($article)
-    ->add('nom', TextType::class)
-    ->add('prix', TextType::class)
-    ->add('save', SubmitType::class, array(
-    'label' => 'Modifier'
-    ))->getForm();
+    $form = $this->createForm(ArticleType::class,$article);
    
     $form->handleRequest($request);
     if($form->isSubmitted() && $form->isValid()) {
    
-    $entityManager = $this->entityManager;
+    //$entityManager = $this->entityManager->getManager();
     $entityManager->flush();
    
     return $this->redirectToRoute('article_list');
     }
-    return $this->render('articles/edit.html.twig', ['form' => $form->createView()]);
-     }
+   
+    return $this->render('articles/edit.html.twig', ['form' =>
+   $form->createView()]);
+    }
+   
 
      public function delete(Request $request, $id) {
       $article = $this->entityManager->getRepository(Article::class)->find($id);
